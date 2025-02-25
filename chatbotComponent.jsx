@@ -1,44 +1,25 @@
-// ChatbotComponent.tsx
+// ChatbotComponent.jsx - UI for the chatbot
 
 import React, { useState, useEffect, useRef } from 'react';
 import ChatbotService from './ChatbotService';
 
-interface Message {
-  sender: 'user' | 'bot';
-  text: string;
-}
-
-interface Suggestion {
-  italian: string;
-  english: string;
-}
-
-interface Correction {
-  original: string;
-  correction: string;
-  explanation: string;
-}
-
-const ChatbotComponent: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    { 
-      sender: 'bot', 
-      text: 'Ciao! Sono Sofia, il tuo tutor di italiano. Come posso aiutarti oggi? (Hello! I\'m Sofia, your Italian tutor. How can I help you today?)' 
-    }
+const ChatbotComponent = () => {
+  const [messages, setMessages] = useState([
+    { sender: 'bot', text: 'Ciao! Sono Sofia, il tuo tutor di italiano. Come posso aiutarti oggi? (Hello! I\'m Sofia, your Italian tutor. How can I help you today?)' }
   ]);
-  const [inputValue, setInputValue] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
-  const [corrections, setCorrections] = useState<Correction[] | null>(null);
-  const [contextMenu, setContextMenu] = useState<boolean>(false);
-  const [levelMenu, setLevelMenu] = useState<boolean>(false);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [corrections, setCorrections] = useState(null);
+  const [contextMenu, setContextMenu] = useState(false);
+  const [levelMenu, setLevelMenu] = useState(false);
   
   // Create chatbot service instance
   const chatbotService = useRef(new ChatbotService()).current;
   
   // Scroll to bottom of messages
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef(null);
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -81,25 +62,25 @@ const ChatbotComponent: React.FC = () => {
     setIsLoading(false);
   };
   
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleSendMessage();
     }
   };
   
-  const handleSuggestionClick = (suggestion: Suggestion) => {
+  const handleSuggestionClick = (suggestion) => {
     setInputValue(suggestion.italian);
     setShowSuggestions(false);
   };
   
-  const setContext = (context: string) => {
+  const setContext = (context) => {
     const response = chatbotService.setContext(context);
     setMessages(prev => [...prev, { sender: 'bot', text: response }]);
     setSuggestions(chatbotService.getSuggestions());
     setContextMenu(false);
   };
   
-  const setProficiencyLevel = (level: string) => {
+  const setProficiencyLevel = (level) => {
     const response = chatbotService.setProficiencyLevel(level);
     setMessages(prev => [...prev, { sender: 'bot', text: response }]);
     setLevelMenu(false);
@@ -173,7 +154,7 @@ const ChatbotComponent: React.FC = () => {
         ))}
         
         {/* Corrections display */}
-        {corrections && corrections.length > 0 && (
+        {corrections && (
           <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -261,17 +242,7 @@ const ChatbotComponent: React.FC = () => {
             Cancella conversazione (Clear conversation)
           </button>
           
-          <button 
-            onClick={() => {
-              const lastBotMessage = messages.findLast(m => m.sender === 'bot');
-              if (lastBotMessage) {
-                const speech = new SpeechSynthesisUtterance(lastBotMessage.text.split('(')[0].trim());
-                speech.lang = 'it-IT';
-                window.speechSynthesis.speak(speech);
-              }
-            }}
-            className="text-xs text-gray-500 hover:text-green-500"
-          >
+          <button className="text-xs text-gray-500 hover:text-green-500">
             🎤 Parla (Speak)
           </button>
         </div>
